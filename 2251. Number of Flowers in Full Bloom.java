@@ -35,18 +35,27 @@ class Solution {
         return started - ended;
     }
 
-    // find the index of the largest value less than equal to k
-    private int findSmaller(int[] arr, int k, boolean greater) {
+    // find the index of the largest value less than or equal to k
+    private int findSmaller(int[] arr, int k, boolean equal) {
         int left = 0;
         int right = arr.length-1;
         int answer = -1;
         while (left <= right) {
             int mid = (left + right) / 2;
-            if (arr[mid] <= k) {
-                answer = mid;
-                left = mid + 1;
+            if (equal) {
+                if (arr[mid] <= k) {
+                    answer = mid;
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
             } else {
-                right = mid - 1;
+                if (arr[mid] < k) {
+                    answer = mid;
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
             }
         }
         return answer;
