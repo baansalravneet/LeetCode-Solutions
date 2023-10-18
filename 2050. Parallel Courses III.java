@@ -1,44 +1,39 @@
 class Solution {
     public int minimumTime(int n, int[][] relations, int[] time) {
-        Map<Integer, Deque<Integer>> map = new HashMap<>();
+        Map<Integer, List<Integer>> graph = new HashMap<>();
         int[] inDegrees = new int[n];
-        for (int i = 0; i < relations.length; i++) {
-            int source = relations[i][0]-1;
-            int destination = relations[i][1]-1;
+        for (int[] edge : relations) {
+            int source = edge[0] - 1;
+            int destination = edge[1] - 1;
             inDegrees[destination]++;
-            map.computeIfAbsent(source, k -> new ArrayDeque<>()).addLast(destination);
+            graph.computeIfAbsent(source, k -> new ArrayList<>()).add(destination);
         }
 
-        int[] startTimes = new int[n];
-        // you want to take the courses which end first
-        Queue<Integer> q = new PriorityQueue<>((a,b) -> startTimes[a]+time[a]-startTimes[b]-time[b]);
-        Arrays.fill(startTimes, Integer.MAX_VALUE);
+        Deque<Integer> q = new ArrayDeque<>();
+        int[] maxTime = new int[n];
+        
         for (int i = 0; i < n; i++) {
             if (inDegrees[i] == 0) {
-                startTimes[i] = 0;
-                q.add(i);
+                maxTime[i] = time[i];
+                q.addLast(i);
             }
         }
+
         while (!q.isEmpty()) {
-            int current = q.poll();
-            int currentStartTime = startTimes[current];
-            if (!map.containsKey(current)) continue;
-            Deque<Integer> neighbours = map.get(current);
-            while (!neighbours.isEmpty()) {
-                int next = neighbours.pollFirst();
+            int current = q.pollFirst();
+            if (!graph.containsKey(current)) continue;
+            for (int next : graph.get(current)) {
+                maxTime[next] = Math.max(maxTime[next], time[next] + maxTime[current]);
                 inDegrees[next]--;
                 if (inDegrees[next] == 0) {
-                    startTimes[next] = Math.min(currentStartTime + time[current], startTimes[next]);
-                    q.add(next);
+                    q.addLast(next);
                 }
             }
         }
-        for (int i : startTimes) {
-            System.out.print(i +" ");
-        }
+
         int answer = 0;
-        for (int i = 0; i < n; i++) {
-            answer = Math.max(answer, startTimes[i] + time[i]);
+        for (int i : maxTime) {
+            answer = Math.max(answer, i);
         }
         return answer;
     }
