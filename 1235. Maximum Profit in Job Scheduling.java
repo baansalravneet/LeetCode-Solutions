@@ -22,20 +22,25 @@ class Solution {
         if (dp[index] != -1) return dp[index];
         Job currentJob = jobs[index];
         // take the job
-        int answer1 = currentJob.profit + helper(jobs, findNextIndex(jobs, index), dp);
+        int answer1 = currentJob.profit + helper(jobs, findNextIndex(jobs, jobs[index].endTime, index+1, jobs.length-1), dp);
         // do not take the job
         int answer2 = helper(jobs, index+1, dp);
         dp[index] = Math.max(answer1, answer2);
         return dp[index];
     }
 
-    // TODO: optimise to linear search
-    private int findNextIndex(Job[] jobs, int index) {
-        int endTime = jobs[index++].endTime;
-        while (index < jobs.length && jobs[index].startTime < endTime) {
-            index++;
+    private int findNextIndex(Job[] jobs, int target, int left, int right) {
+        int answer = right+1;
+        while (left <= right) {
+            int mid = (left+right)/2;
+            if (jobs[mid].startTime >= target) {
+                answer = mid;
+                right = mid-1;
+            } else {
+                left = mid+1;
+            }
         }
-        return index;
+        return answer;
     }
 }
 
