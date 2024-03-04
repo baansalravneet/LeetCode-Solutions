@@ -1,19 +1,35 @@
 class Solution {
     public int[] resultArray(int[] nums) {
-        List<Integer> sortedList1 = new ArrayList<>();
-        List<Integer> sortedList2 = new ArrayList<>();
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+        for (int i : nums) {
+            min = Math.min(min, i);
+            max = Math.max(max, i);
+        }
         List<Integer> list1 = new ArrayList<>();
         List<Integer> list2 = new ArrayList<>();
-        insert(nums[0], list1, sortedList1);
-        insert(nums[1], list2, sortedList2);
+        SegmentTree tree1 = new SegmentTree(min, max);
+        SegmentTree tree2 = new SegmentTree(min, max);
+        list1.add(nums[0]); tree1.add(nums[0]);
+        list2.add(nums[1]); tree2.add(nums[1]);
         for (int i = 2; i < nums.length; i++) {
-            int g1 = getGreater(nums[i], sortedList1);
-            int g2 = getGreater(nums[i], sortedList2);
-            if (g1 < g2) insert(nums[i], list2, sortedList2);
-            else if (g1 > g2) insert(nums[i], list1, sortedList1);
-            else {
-                if (list1.size() <= list2.size()) insert(nums[i], list1, sortedList1);
-                else insert(nums[i], list2, sortedList2);
+            int g1 = tree1.find(nums[i]);
+            int g2 = tree2.find(nums[i]);
+            if (g1 < g2) {
+                list2.add(nums[i]);
+                tree2.add(nums[i]);
+            }
+            else if (g1 > g2) {
+                list1.add(nums[i]);
+                tree1.add(nums[i]);
+            } else {
+                if (list1.size() <= list2.size()) {
+                    list1.add(nums[i]);
+                    tree1.add(nums[i]);
+                } else {
+                    list2.add(nums[i]);
+                    tree2.add(nums[i]);
+                }
             }
         }
         int[] result = new int[nums.length];
@@ -22,30 +38,41 @@ class Solution {
         for (int i : list2) result[index++] = i;
         return result;
     }
-    private int getGreater(int val, List<Integer> list) {
-        int left = 0;
-        int right = list.size()-1;
+}
+
+class SegmentTree {
+    int min;
+    int max;
+    int count;
+    SegmentTree left;
+    SegmentTree right;
+
+    SegmentTree(int min, int max) {
+        this.min = min;
+        this.max = max;
+    }
+
+    int find(int x) {
+        if (x < min) return count;
+        if (x > max) return 0;
         int answer = 0;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (list.get(mid) > val) {
-                answer = list.size() - mid;
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
+        if (right != null) answer += right.find(x);
+        if (left != null) answer += left.find(x);
         return answer;
     }
-    private void insert(int val, List<Integer> list, List<Integer> sortedList) {
-        list.add(val);
-        if (sortedList.isEmpty() || sortedList.get(sortedList.size()-1) <= val) {
-            sortedList.add(val);
-            return;
+
+    void add(int x) {
+        count++;
+        if (min >= max) return;
+        int mid = min + (max - min) / 2;
+        if (x <= mid) {
+            if (left == null) left = new SegmentTree(min, mid);
+            left.add(x);
+        } else {
+            if (right == null) right = new SegmentTree(mid+1, max);
+            right.add(x);
         }
-        int index = Collections.binarySearch(sortedList, val);
-        if (index < 0) index = - index - 1;
-        sortedList.add(index, val);
     }
 }
+
 
