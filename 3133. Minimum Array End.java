@@ -1,19 +1,15 @@
 class Solution {
     public long minEnd(int n, int x) {
-        if (n == 1) return x;
-        String binaryN = Integer.toBinaryString(n-1);
-        String binaryX = Integer.toBinaryString(x);
-        StringBuilder answer = new StringBuilder();
-        int pointer = binaryN.length() - 1;
-        for (int i = binaryX.length() - 1; i >= 0; i--) {
-            if (binaryX.charAt(i) == '1') {
-                answer.append('1');
-            } else {
-                if (pointer >= 0) answer.append(binaryN.charAt(pointer--));
-                else answer.append('0');
+        long answer = (long)x;
+        long num = n - 1;
+        for (int i = 0; i < 64 && num > 0; i++) {
+            if (((long)x & (1L << i)) == 0) {
+                if (num % 2L == 1L) {
+                    answer = answer | (1L << i);
+                }
+                num /= 2L;
             }
         }
-        while (pointer >= 0) answer.append(binaryN.charAt(pointer--));
-        return Long.parseLong(answer.reverse().toString(), 2);
+        return answer;
     }
 }
