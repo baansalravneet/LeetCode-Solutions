@@ -1,12 +1,10 @@
 class Solution {
     public int minimumSize(int[] nums, int maxOperations) {
-        Arrays.sort(nums);
-        int left = 0;
-        int right = -1;
+        int left = 1, right = -1;
         for (int i : nums) {
             right = Math.max(right, i);
         }
-        int answer = right;
+        int answer = -1;
         while (left <= right) {
             int mid = (left + right) / 2;
             if (isPossible(nums, maxOperations, mid)) {
@@ -18,13 +16,13 @@ class Solution {
         }
         return answer;
     }
-    private boolean isPossible(int[] nums, int maxOperations, int minimumValue) {
-        for (int i = nums.length-1; i >= 0; i--) {
-            if (minimumValue >= nums[i]) break;
-            int breaks = (int)Math.ceil((double)nums[i]/minimumValue) - 1;
-            if (breaks > maxOperations) return false;
-            maxOperations -= breaks;
+    private boolean isPossible(int[] nums, int maxOp, int maxVal) {
+        int count = 0;
+        for (int i : nums) {
+            if (i <= maxVal) continue;
+            count += i/maxVal;
+            if (i % maxVal == 0) count--;
         }
-        return true;
+        return count <= maxOp;
     }
 }
